@@ -8,6 +8,8 @@ typedef struct stack {
 } stack;
 
 void getRemovedAmount(stack *[], int, int, int);
+int isFirstOrLast(int, int);
+int hasFreeSide(stack*[], int);
 
 int main() {
     int amount_boxes, amount_stacks;
@@ -35,27 +37,40 @@ int main() {
                 }
             }
         }
-        
-        // check if the target box is on the first or last stack
-        if (target_stack == 0 || target_stack == amount_stacks - 1) {
-            printf("%d ", 0);
-            break;
-        }
 
         const int target_index = target_stack;
         const int last_stack = amount_stacks - 1;
+        int isHead = (stacks[target_index]->size == target_box_level+1);
+        
+        // check if the target box is on the first or last stack
+        if (isFirstOrLast(target_index, amount_stacks) || (isHead && hasFreeSide(stacks, target_index))) {
+            printf("%d ", 0);
+            continue;
+        }
+
         getRemovedAmount(stacks, target_index, target_box_level, last_stack);
     }
 
     return 0;
 }
 
+int isFirstOrLast(int target_index, int amount_stacks) {
+    return (target_index == 0 || target_index == amount_stacks - 1);
+}
+
 int removeUpwards(stack *stack, int box_level) {
-    return (stack->size - box_level);
+    return stack->size - box_level;
 }
 
 int bestOption(int left, int right) {
     return left <= right ? left : right;
+}
+
+int hasFreeSide(stack *stacks[], int target_index) {
+    stack *left = stacks[target_index - 1];
+    stack *target = stacks[target_index];
+    stack *right = stacks[target_index + 1];
+    return ((left->size < target->size) || (right->size < target->size));
 }
 
 void getRemovedAmount(stack *stacks[], int target_index, int target_box_level, int last_stack) {
@@ -72,16 +87,3 @@ void getRemovedAmount(stack *stacks[], int target_index, int target_box_level, i
 
     printf("%d ", bestOption(removed_left - 1, removed_right - 1));
 }
-
-/* TEST CASES
-
-INPUT: 4 3 1 3 2 1 2 1 4
-OUTPUT: 2
-
-INPUT: 4 3 1 3 2 2 1 1 4
-OUTPUT: 0
-
-INPUT: 5 3 2 3 5 1 1 2 2 4
-OUTPUT: 1
-
-*/
